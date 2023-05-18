@@ -1,5 +1,4 @@
-use super::emit;
-
+use super::{emit, EPOCHS_PER_UPDATE};
 use rand::rngs::StdRng;
 use rand::Rng;
 use rand::SeedableRng;
@@ -28,8 +27,6 @@ fn cost(w: f32, bias: f32) -> f32 {
     result /= TRAIN_LEN as f32;
     result
 }
-
-const EPOCHS_PER_UPDATE: usize = 250;
 
 pub(crate) fn run(window: &tauri::Window) {
     let seed: u64 = rand::random();

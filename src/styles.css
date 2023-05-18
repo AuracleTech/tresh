@@ -43,11 +43,30 @@ html {
 #global-wrapper {
 	background-color: var(--global-wrapper-bg-color);
 	display: flex;
-	flex-direction: row;
+	flex-direction: column;
 	height: 100%;
+}
+
+#menu {
+	display: flex;
+	flex-direction: column;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+#menu li {
+	padding: 5px;
+	cursor: pointer;
+	border: 3px solid transparent;
+}
+#menu li:hover {
+	border-left-color: var(--focus);
+	color: var(--focus);
 }
 
 #display {
 	flex: 1;
 	overflow-y: auto;
+	cursor: text;
 }

@@ -1,7 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod nn;
+mod nn1;
+mod nn2;
 
 use tauri::Window;
 
@@ -11,22 +12,25 @@ struct Payload {
     data: String,
 }
 
-// init a background process on the command, and emit periodic events only to the window that used the command
 #[tauri::command]
-async fn init_neural_network(window: Window) {
-    tokio::spawn(async move {
-        nn::run(&window);
-    });
+async fn start_nn1(window: Window) {
+    nn1::run(&window)
+}
+
+#[tauri::command]
+async fn start_nn2(window: Window) {
+    nn2::run(&window)
 }
 
 #[tokio::main]
 async fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![init_neural_network])
+        .invoke_handler(tauri::generate_handler![start_nn1, start_nn2])
         .run(tauri::generate_context!())
         .expect("failed to run app");
 }
 
+const EPOCHS_PER_UPDATE: usize = 250;
 pub(crate) fn emit(window: &Window, event_name: &str, data: String) {
     window
         .emit(event_name, Payload { data })
