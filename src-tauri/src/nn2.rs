@@ -11,7 +11,6 @@ const TRAIN: [[f32; 3]; TRAIN_LEN] = [
     [1.0, 1.0, 1.0], //
 ];
 const LEARNING_RATE: f32 = 1e-2;
-const STEP: f32 = 1e-3;
 const EPOCHS: usize = 2000;
 
 fn cost(w1: f32, w2: f32, bias: f32) -> f32 {
@@ -34,15 +33,17 @@ pub(crate) fn run(window: &tauri::Window) {
     let mut w1: f32 = rng.gen();
     let mut w2: f32 = rng.gen();
     let mut bias: f32 = rng.gen_range(0..=2) as f32;
+    let mut step: f32 = if rng.gen::<bool>() { 1.0 } else { -1.0 };
+    step *= 1e-3;
 
     for epoch in 0..EPOCHS {
         let c = cost(w1, w2, bias);
-        let stepped_cost_w1 = cost(w1 + STEP, w2, bias);
-        let stepped_cost_w2 = cost(w1, w2 + STEP, bias);
-        let stepped_cost_bias = cost(w1, w2, bias + STEP);
-        let derivative_w1 = (stepped_cost_w1 - c) / STEP;
-        let derivative_w2 = (stepped_cost_w2 - c) / STEP;
-        let derivative_bias = (stepped_cost_bias - c) / STEP;
+        let stepped_cost_w1 = cost(w1 + step, w2, bias);
+        let stepped_cost_w2 = cost(w1, w2 + step, bias);
+        let stepped_cost_bias = cost(w1, w2, bias + step);
+        let derivative_w1 = (stepped_cost_w1 - c) / step;
+        let derivative_w2 = (stepped_cost_w2 - c) / step;
+        let derivative_bias = (stepped_cost_bias - c) / step;
         w1 -= LEARNING_RATE * derivative_w1;
         w2 -= LEARNING_RATE * derivative_w2;
         bias -= LEARNING_RATE * derivative_bias;
