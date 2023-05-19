@@ -10,21 +10,26 @@ const TRAIN: [[f32; 3]; TRAIN_LEN] = [
     [0.0, 1.0, 1.0], //
     [1.0, 1.0, 1.0], //
 ];
-const LEARNING_RATE: f32 = 1e-2;
-const EPOCHS: usize = 2000;
+const LEARNING_RATE: f32 = 1e-1;
+const EPOCHS: usize = 10000;
 
 fn cost(w1: f32, w2: f32, bias: f32) -> f32 {
     let mut result = 0.0;
     for i in 0..TRAIN_LEN {
         let x1 = TRAIN[i][0];
         let x2 = TRAIN[i][1];
-        let y = x1 * w1 + x2 * w2 + bias;
+        let mut y = (x1 * w1) + (x2 * w2) + bias;
+        y = sigmoid(y); // CHANGE AFFECTS WEIGHTS RESULT
         let expected = TRAIN[i][TRAIN_LEN - 2];
         let d = y - expected;
         result += d * d;
     }
     result /= TRAIN_LEN as f32;
     result
+}
+
+fn sigmoid(x: f32) -> f32 {
+    1.0 / (1.0 + (-x).exp())
 }
 
 pub(crate) fn run(window: &tauri::Window) {
@@ -34,7 +39,8 @@ pub(crate) fn run(window: &tauri::Window) {
     let mut w2: f32 = rng.gen();
     let mut bias: f32 = rng.gen_range(0..=2) as f32;
     let mut step: f32 = if rng.gen::<bool>() { 1.0 } else { -1.0 };
-    step *= 1e-3;
+    step *= 1e-1;
+    emit(&window, "result", format!("step: {}", step));
 
     for epoch in 0..EPOCHS {
         let c = cost(w1, w2, bias);
