@@ -56,8 +56,11 @@ async fn main() {
 }
 
 const EPOCHS_PER_UPDATE: usize = 250;
-pub(crate) fn emit(window: &Window, event_name: &str, data: String) {
-    window
-        .emit(event_name, Payload { data })
-        .expect("failed to emit");
+pub(crate) fn emit<T: ToString>(window: &Window, event_name: &str, data: T) {
+    let payload = Payload {
+        data: data.to_string(),
+    };
+    if let Err(err) = window.emit(event_name, payload) {
+        eprintln!("Failed to emit event: {}", err);
+    }
 }

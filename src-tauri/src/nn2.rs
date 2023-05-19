@@ -4,13 +4,27 @@ use rand::Rng;
 use rand::SeedableRng;
 
 const TRAIN_LEN: usize = 4;
-const TRAIN: [[f32; 3]; TRAIN_LEN] = [
+const OR_GATE: [[f32; 3]; TRAIN_LEN] = [
     [0.0, 0.0, 0.0], //
     [1.0, 0.0, 1.0], //
     [0.0, 1.0, 1.0], //
     [1.0, 1.0, 1.0], //
 ];
-const LEARNING_RATE: f32 = 1e-1;
+const AND_GATE: [[f32; 3]; TRAIN_LEN] = [
+    [0.0, 0.0, 0.0], //
+    [1.0, 0.0, 0.0], //
+    [0.0, 1.0, 0.0], //
+    [1.0, 1.0, 1.0], //
+];
+const NAND_GATE: [[f32; 3]; TRAIN_LEN] = [
+    [0.0, 0.0, 1.0], //
+    [1.0, 0.0, 1.0], //
+    [0.0, 1.0, 1.0], //
+    [1.0, 1.0, 0.0], //
+];
+
+const TRAIN: &[[f32; 3]; 4] = &NAND_GATE;
+const LEARNING_RATE: f32 = 1e-0;
 const EPOCHS: usize = 10000;
 
 fn cost(w1: f32, w2: f32, bias: f32) -> f32 {
@@ -18,8 +32,7 @@ fn cost(w1: f32, w2: f32, bias: f32) -> f32 {
     for i in 0..TRAIN_LEN {
         let x1 = TRAIN[i][0];
         let x2 = TRAIN[i][1];
-        let mut y = (x1 * w1) + (x2 * w2) + bias;
-        y = sigmoid(y); // CHANGE AFFECTS WEIGHTS RESULT
+        let y = sigmoid((x1 * w1) + (x2 * w2) + bias);
         let expected = TRAIN[i][TRAIN_LEN - 2];
         let d = y - expected;
         result += d * d;
@@ -54,7 +67,7 @@ pub(crate) fn run(window: &tauri::Window) {
         w2 -= LEARNING_RATE * derivative_w2;
         bias -= LEARNING_RATE * derivative_bias;
 
-        if epoch % EPOCHS_PER_UPDATE == 0 {
+        if epoch % EPOCHS_PER_UPDATE == 0 || epoch == 0 {
             emit(
                 &window,
                 "epoch",
@@ -65,11 +78,8 @@ pub(crate) fn run(window: &tauri::Window) {
                 ),
             );
         }
-        if epoch > 9998 {
-            emit(&window, "result", format!("EPOCH NUMBER: {}", epoch,));
-        }
     }
-    emit(&window, "result", "RESULTS".to_string());
+    emit(&window, "result", "RESULTS");
     emit(&window, "result", format!("w1: {}", w1));
     emit(&window, "result", format!("w2: {}", w2));
     emit(&window, "result", format!("bias: {}", bias));
@@ -78,4 +88,22 @@ pub(crate) fn run(window: &tauri::Window) {
         "result",
         format!("cost(w1, w2, bias): {}", cost(w1, w2, bias)),
     );
+
+    for i in 0..=1 {
+        for j in 0..=1 {
+            emit(
+                &window,
+                "result",
+                format!(
+                    "sigmoid(i as f32 * w1 + j as f32 * w2 + bias) = sigmoid({} * {} + {} * {} + {}) = {}",
+                    i,
+                    w1,
+                    j,
+                    w2,
+                    bias,
+                    sigmoid(i as f32 * w1 + j as f32 * w2 + bias)
+                ),
+            );
+        }
+    }
 }
