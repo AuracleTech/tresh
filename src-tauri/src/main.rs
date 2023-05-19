@@ -10,8 +10,8 @@ use tauri::{State, Window};
 
 #[derive(Serialize, Clone)]
 pub(crate) struct AuthState {
-    #[serde(skip_serializing)]
-    token: Option<String>,
+    // #[serde(skip_serializing)]
+    // token: Option<String>,
     logged_in: bool,
 }
 
@@ -47,7 +47,7 @@ async fn start_nn2(window: Window) {
 async fn main() {
     tauri::Builder::default()
         .manage(Mutex::new(AuthState {
-            token: None,
+            // token: None,
             logged_in: false,
         }))
         .invoke_handler(tauri::generate_handler![start_nn1, start_nn2, login])
