@@ -42,7 +42,7 @@ pub(crate) fn run(window: &tauri::Window) {
     step *= 1e-1;
     emit(&window, "result", format!("step: {}", step));
 
-    for epoch in 0..EPOCHS {
+    for epoch in 1..=EPOCHS {
         let c = cost(w1, w2, bias);
         let stepped_cost_w1 = cost(w1 + step, w2, bias);
         let stepped_cost_w2 = cost(w1, w2 + step, bias);
@@ -64,6 +64,9 @@ pub(crate) fn run(window: &tauri::Window) {
                     cost(w1, w2, bias)
                 ),
             );
+        }
+        if epoch > 9998 {
+            emit(&window, "result", format!("EPOCH NUMBER: {}", epoch,));
         }
     }
     emit(&window, "result", "RESULTS".to_string());

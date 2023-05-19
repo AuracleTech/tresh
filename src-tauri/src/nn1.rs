@@ -34,7 +34,7 @@ pub(crate) fn run(window: &tauri::Window) {
     let mut w: f32 = rng.gen_range(0..=10) as f32;
     let mut bias: f32 = rng.gen_range(0..=5) as f32;
 
-    for epoch in 0..EPOCHS {
+    for epoch in 1..=EPOCHS {
         let c = cost(w, bias);
         let stepped_cost_weight = cost(w + STEP, bias);
         let stepped_cost_bias = cost(w, bias + STEP);
