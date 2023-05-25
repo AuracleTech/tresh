@@ -1,48 +1,22 @@
-use super::{emit, EPOCHS_PER_UPDATE};
+use super::emit;
+use crate::data::{EPOCHS, EPOCHS_PER_PRINT, LEARNING_RATE, TRAINING_DATA};
+use crate::math::sigmoid;
 use rand::rngs::StdRng;
 use rand::Rng;
 use rand::SeedableRng;
 
-const TRAIN_LEN: usize = 4;
-const OR_GATE: [[f32; 3]; TRAIN_LEN] = [
-    [0.0, 0.0, 0.0], //
-    [1.0, 0.0, 1.0], //
-    [0.0, 1.0, 1.0], //
-    [1.0, 1.0, 1.0], //
-];
-const AND_GATE: [[f32; 3]; TRAIN_LEN] = [
-    [0.0, 0.0, 0.0], //
-    [1.0, 0.0, 0.0], //
-    [0.0, 1.0, 0.0], //
-    [1.0, 1.0, 1.0], //
-];
-const NAND_GATE: [[f32; 3]; TRAIN_LEN] = [
-    [0.0, 0.0, 1.0], //
-    [1.0, 0.0, 1.0], //
-    [0.0, 1.0, 1.0], //
-    [1.0, 1.0, 0.0], //
-];
-
-const TRAIN: &[[f32; 3]; 4] = &NAND_GATE;
-const LEARNING_RATE: f32 = 1e-0;
-const EPOCHS: usize = 10000;
-
 fn cost(w1: f32, w2: f32, bias: f32) -> f32 {
     let mut result = 0.0;
-    for i in 0..TRAIN_LEN {
-        let x1 = TRAIN[i][0];
-        let x2 = TRAIN[i][1];
+    for i in 0..TRAINING_DATA.len() {
+        let x1 = TRAINING_DATA[i][0];
+        let x2 = TRAINING_DATA[i][1];
         let y = sigmoid((x1 * w1) + (x2 * w2) + bias);
-        let expected = TRAIN[i][TRAIN_LEN - 2];
+        let expected = TRAINING_DATA[i][TRAINING_DATA.len() - 2];
         let d = y - expected;
         result += d * d;
     }
-    result /= TRAIN_LEN as f32;
+    result /= TRAINING_DATA.len() as f32;
     result
-}
-
-fn sigmoid(x: f32) -> f32 {
-    1.0 / (1.0 + (-x).exp())
 }
 
 pub(crate) fn run(window: &tauri::Window) {
@@ -67,7 +41,7 @@ pub(crate) fn run(window: &tauri::Window) {
         w2 -= LEARNING_RATE * derivative_w2;
         bias -= LEARNING_RATE * derivative_bias;
 
-        if epoch % EPOCHS_PER_UPDATE == 0 || epoch == 0 {
+        if epoch % EPOCHS_PER_PRINT == 0 {
             emit(
                 &window,
                 "epoch",

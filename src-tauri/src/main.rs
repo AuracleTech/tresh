@@ -1,8 +1,11 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod data;
+mod math;
 mod nn1;
 mod nn2;
+mod nn3;
 
 use serde::Serialize;
 use std::sync::Mutex;
@@ -32,15 +35,20 @@ struct Payload {
 #[tauri::command]
 async fn start_nn1(window: Window) {
     nn1::run(&window);
-    let id = window.listen("test", |event| {
-        println!("got window event-name with payload {:?}", event.payload());
-    });
-    window.unlisten(id);
+    // let id = window.listen("test", |event| {
+    //     println!("got window event-name with payload {:?}", event.payload());
+    // });
+    // window.unlisten(id);
 }
 
 #[tauri::command]
 async fn start_nn2(window: Window) {
     nn2::run(&window)
+}
+
+#[tauri::command]
+async fn start_nn3(window: Window) {
+    nn3::run(&window)
 }
 
 #[tokio::main]
@@ -50,12 +58,13 @@ async fn main() {
             // token: None,
             logged_in: false,
         }))
-        .invoke_handler(tauri::generate_handler![start_nn1, start_nn2, login])
+        .invoke_handler(tauri::generate_handler![
+            start_nn1, start_nn2, login, start_nn3
+        ])
         .run(tauri::generate_context!())
         .expect("failed to run app");
 }
 
-const EPOCHS_PER_UPDATE: usize = 250;
 pub(crate) fn emit<T: ToString>(window: &Window, event_name: &str, data: T) {
     let payload = Payload {
         data: data.to_string(),
