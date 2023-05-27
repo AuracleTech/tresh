@@ -3,6 +3,7 @@
 
 mod data;
 mod math;
+mod nn;
 mod nn1;
 mod nn2;
 mod nn3;
@@ -33,6 +34,10 @@ struct Payload {
 }
 
 #[tauri::command]
+async fn start_percepteur(window: Window) {
+    nn::run(&window);
+}
+#[tauri::command]
 async fn start_nn1(window: Window) {
     nn1::run(&window);
     // let id = window.listen("test", |event| {
@@ -40,12 +45,10 @@ async fn start_nn1(window: Window) {
     // });
     // window.unlisten(id);
 }
-
 #[tauri::command]
 async fn start_nn2(window: Window) {
     nn2::run(&window)
 }
-
 #[tauri::command]
 async fn start_nn3(window: Window) {
     nn3::run(&window)
@@ -59,7 +62,11 @@ async fn main() {
             logged_in: false,
         }))
         .invoke_handler(tauri::generate_handler![
-            start_nn1, start_nn2, login, start_nn3
+            start_nn1,
+            start_nn2,
+            login,
+            start_nn3,
+            start_percepteur
         ])
         .run(tauri::generate_context!())
         .expect("failed to run app");
