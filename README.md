@@ -1,7 +1,3 @@
-<center>
-
-###### Work in Progress
+#### Work in Progress
 
 ![WIP](https://i.redd.it/kshwti4ihig11.gif)
-
-</center>
