@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+#[allow(dead_code)]
 mod data;
 mod math;
 mod nn;
@@ -72,11 +73,11 @@ async fn main() {
         .expect("failed to run app");
 }
 
-pub(crate) fn emit<T: ToString>(window: &Window, event_name: &str, data: T) {
+pub(crate) fn emit<T: ToString>(window: &Window, data: T) {
     let payload = Payload {
         data: data.to_string(),
     };
-    if let Err(err) = window.emit(event_name, payload) {
+    if let Err(err) = window.emit("print", payload) {
         eprintln!("Failed to emit event: {}", err);
     }
 }

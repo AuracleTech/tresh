@@ -17,11 +17,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 	start_nn3 = document.getElementById("start-nn3");
 	test = document.getElementById("test");
 
-	appWindow.listen("epoch", (event) => {
-		display.innerHTML += `${event.payload.data}<br>`;
-	});
-
-	appWindow.listen("result", (event) => {
+	appWindow.listen("print", (event) => {
 		display.innerHTML += `${event.payload.data}<br>`;
 	});
 

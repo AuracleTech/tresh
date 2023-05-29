@@ -1,6 +1,7 @@
-pub(crate) const LEARNING_RATE: f32 = 1e-1;
+pub(crate) const RNG_SEED: u64 = 0xdeadbeef;
+pub(crate) const LEARN_RATE: f32 = 1e-1;
 pub(crate) const STEP: f32 = 1e-1;
-pub(crate) const EPOCHS: usize = 1000000;
+pub(crate) const EPOCHS: usize = 100000;
 const TOTAL_PRINTS_DURING_EPOCHS: usize = 20;
 pub(crate) const EPOCHS_PER_PRINT: usize = EPOCHS / TOTAL_PRINTS_DURING_EPOCHS;
 

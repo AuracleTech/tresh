@@ -1,5 +1,5 @@
 use super::emit;
-use crate::data::{EPOCHS, LEARNING_RATE, STEP};
+use crate::data::{EPOCHS, LEARN_RATE, STEP};
 use crate::data::{EPOCHS_PER_PRINT, TRAINING_DATA};
 use rand::rngs::StdRng;
 use rand::Rng;
@@ -30,17 +30,16 @@ pub(crate) fn run(window: &tauri::Window) {
         let stepped_cost_bias = cost(w, bias + STEP);
         let derivative_weight = (stepped_cost_weight - c) / STEP;
         let derivative_bias = (stepped_cost_bias - c) / STEP;
-        w -= LEARNING_RATE * derivative_weight;
-        bias -= LEARNING_RATE * derivative_bias;
+        w -= LEARN_RATE * derivative_weight;
+        bias -= LEARN_RATE * derivative_bias;
         if epoch % EPOCHS_PER_PRINT == 0 {
             emit(
                 &window,
-                "epoch",
                 format!("epoch: {}, cost(w, bias): {}", epoch, cost(w, bias)),
             );
         }
     }
-    emit(&window, "result", "RESULTS".to_string());
-    emit(&window, "result", format!("w: {}", w));
-    emit(&window, "result", format!("bias: {}", bias));
+    emit(&window, "RESULTS".to_string());
+    emit(&window, format!("w: {}", w));
+    emit(&window, format!("bias: {}", bias));
 }

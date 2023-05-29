@@ -1,12 +1,11 @@
+use crate::data::RNG_SEED;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 
-const RNG_SEED: u64 = 0;
-
 #[derive(Debug)]
-pub(crate) struct Mat<'a> {
-    rows: usize,
-    columns: usize,
-    data: &'a mut [f32],
+pub(crate) struct Mat {
+    pub(crate) rows: usize,
+    pub(crate) columns: usize,
+    pub(crate) data: Vec<f32>,
 }
 
 #[macro_export]
@@ -16,23 +15,31 @@ macro_rules! MAT_AT {
     };
 }
 
-impl Mat<'_> {
-    pub(crate) fn new(rows: usize, columns: usize, data: &mut [f32]) -> Mat {
-        assert_eq!(rows * columns, data.len());
+#[macro_export]
+macro_rules! MAT_PRINT {
+    ($mat:expr, $decimals:literal) => {
+        $mat.print($decimals, stringify!($mat));
+    };
+}
+
+impl Mat {
+    pub(crate) fn new(rows: usize, columns: usize) -> Mat {
         Mat {
             rows,
             columns,
-            data,
+            data: vec![0.0; rows * columns],
         }
     }
 
-    pub(crate) fn print(&self, decimals: usize) {
+    pub(crate) fn print(&self, decimals: usize, name: &str) {
+        println!("{} = [", name);
         for row in 0..self.rows {
             for col in 0..self.columns {
-                print!("{:.*} ", decimals, MAT_AT!(self, row, col));
+                print!("  {:.*} ", decimals, MAT_AT!(self, row, col));
             }
             println!();
         }
+        println!("]");
     }
 
     pub(crate) fn fill(&mut self, value: f32) {
@@ -58,6 +65,28 @@ impl Mat<'_> {
         for row in 0..self.rows {
             for col in 0..self.columns {
                 MAT_AT!(self, row, col) += MAT_AT!(other, row, col);
+            }
+        }
+    }
+
+    pub(crate) fn set(&mut self, row: usize, col: usize, value: f32) {
+        assert!(row < self.rows);
+        assert!(col < self.columns);
+
+        MAT_AT!(self, row, col) = value;
+    }
+
+    pub(crate) fn get(&self, row: usize, col: usize) -> f32 {
+        assert!(row < self.rows);
+        assert!(col < self.columns);
+
+        MAT_AT!(self, row, col)
+    }
+
+    pub(crate) fn sigmoid(&mut self) {
+        for row in 0..self.rows {
+            for col in 0..self.columns {
+                MAT_AT!(self, row, col) = sigmoidf(MAT_AT!(self, row, col));
             }
         }
     }
@@ -90,4 +119,8 @@ pub(crate) fn mat_sum(dst: &mut Mat, a: &Mat, b: &Mat) {
             MAT_AT!(dst, row, col) = MAT_AT!(a, row, col) + MAT_AT!(b, row, col);
         }
     }
+}
+
+pub(crate) fn sigmoidf(x: f32) -> f32 {
+    1.0 / (1.0 + (-x).exp())
 }

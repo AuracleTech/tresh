@@ -1,5 +1,5 @@
 use super::emit;
-use crate::data::{EPOCHS, EPOCHS_PER_PRINT, LEARNING_RATE, TRAINING_DATA};
+use crate::data::{EPOCHS, EPOCHS_PER_PRINT, LEARN_RATE, TRAINING_DATA};
 use crate::math::sigmoid;
 use rand::rngs::StdRng;
 use rand::Rng;
@@ -27,7 +27,7 @@ pub(crate) fn run(window: &tauri::Window) {
     let mut bias: f32 = rng.gen_range(0..=2) as f32;
     let mut step: f32 = if rng.gen::<bool>() { 1.0 } else { -1.0 };
     step *= 1e-1;
-    emit(&window, "result", format!("step: {}", step));
+    emit(&window, format!("step: {}", step));
 
     for epoch in 1..=EPOCHS {
         let c = cost(w1, w2, bias);
@@ -37,14 +37,13 @@ pub(crate) fn run(window: &tauri::Window) {
         let derivative_w1 = (stepped_cost_w1 - c) / step;
         let derivative_w2 = (stepped_cost_w2 - c) / step;
         let derivative_bias = (stepped_cost_bias - c) / step;
-        w1 -= LEARNING_RATE * derivative_w1;
-        w2 -= LEARNING_RATE * derivative_w2;
-        bias -= LEARNING_RATE * derivative_bias;
+        w1 -= LEARN_RATE * derivative_w1;
+        w2 -= LEARN_RATE * derivative_w2;
+        bias -= LEARN_RATE * derivative_bias;
 
         if epoch % EPOCHS_PER_PRINT == 0 {
             emit(
                 &window,
-                "epoch",
                 format!(
                     "epoch: {}, cost(w1, w2, bias): {}",
                     epoch,
@@ -53,13 +52,12 @@ pub(crate) fn run(window: &tauri::Window) {
             );
         }
     }
-    emit(&window, "result", "RESULTS");
-    emit(&window, "result", format!("w1: {}", w1));
-    emit(&window, "result", format!("w2: {}", w2));
-    emit(&window, "result", format!("bias: {}", bias));
+    emit(&window, "RESULTS");
+    emit(&window, format!("w1: {}", w1));
+    emit(&window, format!("w2: {}", w2));
+    emit(&window, format!("bias: {}", bias));
     emit(
         &window,
-        "result",
         format!("cost(w1, w2, bias): {}", cost(w1, w2, bias)),
     );
 
@@ -67,7 +65,6 @@ pub(crate) fn run(window: &tauri::Window) {
         for j in 0..=1 {
             emit(
                 &window,
-                "result",
                 format!(
                     "sigmoid(i as f32 * w1 + j as f32 * w2 + bias) = sigmoid({} * {} + {} * {} + {}) = {}",
                     i,

@@ -1,5 +1,5 @@
 use super::emit;
-use crate::data::{EPOCHS, EPOCHS_PER_PRINT, LEARNING_RATE, STEP, TRAINING_DATA};
+use crate::data::{EPOCHS, EPOCHS_PER_PRINT, LEARN_RATE, STEP, TRAINING_DATA};
 use crate::math::sigmoid;
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
@@ -85,17 +85,17 @@ fn finite_diff(m: &mut XorGate) -> XorGate {
 }
 
 fn train(m: &mut XorGate, g: &XorGate) {
-    m.or_w1 -= g.or_w1 * LEARNING_RATE;
-    m.or_w2 -= g.or_w2 * LEARNING_RATE;
-    m.or_bias -= g.or_bias * LEARNING_RATE;
+    m.or_w1 -= g.or_w1 * LEARN_RATE;
+    m.or_w2 -= g.or_w2 * LEARN_RATE;
+    m.or_bias -= g.or_bias * LEARN_RATE;
 
-    m.nand_w1 -= g.nand_w1 * LEARNING_RATE;
-    m.nand_w2 -= g.nand_w2 * LEARNING_RATE;
-    m.nand_bias -= g.nand_bias * LEARNING_RATE;
+    m.nand_w1 -= g.nand_w1 * LEARN_RATE;
+    m.nand_w2 -= g.nand_w2 * LEARN_RATE;
+    m.nand_bias -= g.nand_bias * LEARN_RATE;
 
-    m.and_w1 -= g.and_w1 * LEARNING_RATE;
-    m.and_w2 -= g.and_w2 * LEARNING_RATE;
-    m.and_bias -= g.and_bias * LEARNING_RATE;
+    m.and_w1 -= g.and_w1 * LEARN_RATE;
+    m.and_w2 -= g.and_w2 * LEARN_RATE;
+    m.and_bias -= g.and_bias * LEARN_RATE;
 }
 
 fn cost(m: &XorGate) -> f32 {
@@ -124,7 +124,7 @@ pub(crate) fn run(window: &tauri::Window) {
     let seed: u64 = rand::random();
     let mut rng = StdRng::seed_from_u64(seed);
 
-    emit(window, "result", format!("Seed {}", seed));
+    emit(window, format!("Seed {}", seed));
 
     let mut m = XorGate {
         or_w1: rng.gen(),
@@ -143,16 +143,12 @@ pub(crate) fn run(window: &tauri::Window) {
         train(&mut m, &g);
         let new_cost = cost(&m);
         if epoch % EPOCHS_PER_PRINT == 0 {
-            emit(
-                window,
-                "result",
-                format!("Cost after epoch {}: {}", epoch, new_cost),
-            );
+            emit(window, format!("Cost after epoch {}: {}", epoch, new_cost));
         }
     }
     format!("Final cost: {}", cost(&m));
 
-    emit(window, "result", "<hr/>");
+    emit(window, "<hr/>");
 
     // XOR?
     for i in 0..2 {
@@ -160,37 +156,37 @@ pub(crate) fn run(window: &tauri::Window) {
             let x1 = i as f32;
             let x2 = j as f32;
             let y = forward(&m, x1, x2);
-            emit(window, "result", format!("?XOR({},{}) = {}", x1, x2, y));
+            emit(window, format!("?XOR({},{}) = {}", x1, x2, y));
         }
     }
 
-    emit(window, "result", "<hr/>");
+    emit(window, "<hr/>");
 
     // OR?
     for i in 0..2 {
         for j in 0..2 {
             let val = sigmoid((m.or_w1 * i as f32) + (m.or_w2 * j as f32) + m.or_bias);
-            emit(window, "result", format!("?OR({}, {}) = {}", i, j, val));
+            emit(window, format!("?OR({}, {}) = {}", i, j, val));
         }
     }
 
-    emit(window, "result", "<hr/>");
+    emit(window, "<hr/>");
 
     // NAND?
     for i in 0..2 {
         for j in 0..2 {
             let val = sigmoid((m.nand_w1 * i as f32) + (m.nand_w2 * j as f32) + m.nand_bias);
-            emit(window, "result", format!("?NAND({}, {}) = {}", i, j, val));
+            emit(window, format!("?NAND({}, {}) = {}", i, j, val));
         }
     }
 
-    emit(window, "result", "<hr/>");
+    emit(window, "<hr/>");
 
     // AND?
     for i in 0..2 {
         for j in 0..2 {
             let val = sigmoid((m.and_w1 * i as f32) + (m.and_w2 * j as f32) + m.and_bias);
-            emit(window, "result", format!("?AND({}, {}) = {}", i, j, val));
+            emit(window, format!("?AND({}, {}) = {}", i, j, val));
         }
     }
 }
