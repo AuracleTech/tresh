@@ -1,23 +1,23 @@
 use crate::{
-    brain::Mat,
+    brain::Matrix,
     data::{EPOCHS, EPOCHS_PER_PRINT, LEARN_RATE, STEP},
     emit,
 };
 
 #[derive(Debug)]
 struct Xor {
-    a0: Mat,
+    a0: Matrix,
 
-    w1: Mat,
-    b1: Mat,
-    a1: Mat,
+    w1: Matrix,
+    b1: Matrix,
+    a1: Matrix,
 
-    w2: Mat,
-    b2: Mat,
-    a2: Mat,
+    w2: Matrix,
+    b2: Matrix,
+    a2: Matrix,
 }
 
-pub(crate) fn mat_dot(dst: &mut Mat, a: &Mat, b: &Mat) {
+pub(crate) fn mat_dot(dst: &mut Matrix, a: &Matrix, b: &Matrix) {
     assert_eq!(a.columns, b.rows);
     assert_eq!(dst.rows, a.rows);
     assert_eq!(dst.columns, b.columns);
@@ -46,7 +46,7 @@ impl Xor {
         self.a2.sigmoid();
     }
 
-    pub(crate) fn cost(&mut self, ti: &Mat, to: &Mat) -> f32 {
+    pub(crate) fn cost(&mut self, ti: &Matrix, to: &Matrix) -> f32 {
         assert_eq!(ti.rows, to.rows);
         assert_eq!(to.columns, self.a2.columns);
 
@@ -69,7 +69,7 @@ impl Xor {
     }
 }
 
-fn finite_difference(m: &mut Xor, g: &mut Xor, ti: &Mat, to: &Mat) {
+fn finite_difference(m: &mut Xor, g: &mut Xor, ti: &Matrix, to: &Matrix) {
     let mut saved;
 
     let c = m.cost(ti, to);
@@ -151,7 +151,7 @@ pub(crate) fn run(window: &tauri::Window) {
     ];
 
     // Input (from truth table)
-    let mut ti = Mat::new(4, 2);
+    let mut ti = Matrix::new(4, 2);
     for i in 0..4 {
         for j in 0..2 {
             ti.set(i, j, td[i][j]);
@@ -159,29 +159,29 @@ pub(crate) fn run(window: &tauri::Window) {
     }
 
     // Target (from truth table)
-    let mut to = Mat::new(4, 1);
+    let mut to = Matrix::new(4, 1);
     for i in 0..4 {
         to.set(i, 0, td[i][2]);
     }
 
     // Network
     let mut m = Xor {
-        a0: Mat::new(1, 2),
-        w1: Mat::new(2, 2),
-        b1: Mat::new(1, 2),
-        a1: Mat::new(1, 2),
-        w2: Mat::new(2, 1),
-        b2: Mat::new(1, 1),
-        a2: Mat::new(1, 1),
+        a0: Matrix::new(1, 2),
+        w1: Matrix::new(2, 2),
+        b1: Matrix::new(1, 2),
+        a1: Matrix::new(1, 2),
+        w2: Matrix::new(2, 1),
+        b2: Matrix::new(1, 1),
+        a2: Matrix::new(1, 1),
     };
     let mut g: Xor = Xor {
-        a0: Mat::new(1, 2),
-        w1: Mat::new(2, 2),
-        b1: Mat::new(1, 2),
-        a1: Mat::new(1, 2),
-        w2: Mat::new(2, 1),
-        b2: Mat::new(1, 1),
-        a2: Mat::new(1, 1),
+        a0: Matrix::new(1, 2),
+        w1: Matrix::new(2, 2),
+        b1: Matrix::new(1, 2),
+        a1: Matrix::new(1, 2),
+        w2: Matrix::new(2, 1),
+        b2: Matrix::new(1, 1),
+        a2: Matrix::new(1, 1),
     };
 
     m.w1.fill_rand(0.0, 1.0);

@@ -7,15 +7,15 @@ pub(crate) fn sigmoid(x: f32) -> f32 {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct Mat {
+pub(crate) struct Matrix {
     pub rows: usize,
     pub columns: usize,
     pub data: Vec<f32>,
 }
 
-impl Mat {
-    pub(crate) fn new(rows: usize, columns: usize) -> Mat {
-        Mat {
+impl Matrix {
+    pub(crate) fn new(rows: usize, columns: usize) -> Matrix {
+        Matrix {
             rows,
             columns,
             data: vec![0.0; rows * columns],
@@ -38,7 +38,7 @@ impl Mat {
         }
     }
 
-    pub(crate) fn add(&mut self, other: &Mat) {
+    pub(crate) fn add(&mut self, other: &Matrix) {
         assert_eq!(self.rows, other.rows);
         assert_eq!(self.columns, other.columns);
 
@@ -49,7 +49,7 @@ impl Mat {
         }
     }
 
-    pub(crate) fn sub(&mut self, other: &Mat) {
+    pub(crate) fn sub(&mut self, other: &Matrix) {
         assert_eq!(self.rows, other.rows);
         assert_eq!(self.columns, other.columns);
 
@@ -82,8 +82,8 @@ impl Mat {
         }
     }
 
-    pub(crate) fn row(&self, row: usize) -> Mat {
-        let mut result = Mat::new(1, self.columns);
+    pub(crate) fn row(&self, row: usize) -> Matrix {
+        let mut result = Matrix::new(1, self.columns);
 
         for col in 0..self.columns {
             result.set(0, col, self.get(row, col));
@@ -92,10 +92,10 @@ impl Mat {
         result
     }
 
-    pub(crate) fn dot(&mut self, other: &Mat) {
+    pub(crate) fn dot(&mut self, other: &Matrix) {
         assert_eq!(self.columns, other.rows);
 
-        let mut result = Mat::new(self.rows, other.columns);
+        let mut result = Matrix::new(self.rows, other.columns);
 
         for row in 0..self.rows {
             for col in 0..other.columns {
@@ -121,9 +121,9 @@ impl Mat {
 
 #[derive(Debug)]
 pub(crate) struct Brain {
-    w: Vec<Mat>,
-    b: Vec<Mat>,
-    a: Vec<Mat>,
+    w: Vec<Matrix>,
+    b: Vec<Matrix>,
+    a: Vec<Matrix>,
 }
 
 impl Brain {
@@ -137,12 +137,12 @@ impl Brain {
             a: Vec::new(),
         };
 
-        brain.a.push(Mat::new(1, arch[0]));
+        brain.a.push(Matrix::new(1, arch[0]));
 
         for i in 1..arch.len() {
-            brain.w.push(Mat::new(arch[i - 1], arch[i]));
-            brain.b.push(Mat::new(1, arch[i]));
-            brain.a.push(Mat::new(1, arch[i]));
+            brain.w.push(Matrix::new(arch[i - 1], arch[i]));
+            brain.b.push(Matrix::new(1, arch[i]));
+            brain.a.push(Matrix::new(1, arch[i]));
         }
 
         brain
@@ -155,15 +155,16 @@ impl Brain {
         }
     }
 
-    pub(crate) fn print(&self) {
-        println!("Brain = [");
+    pub(crate) fn to_string(&self) -> String {
+        let mut result = String::new();
         for i in 0..self.w.len() {
-            println!("    Layer {} = [", i);
-            println!("        w = {:?}", self.w[i]);
-            println!("        b = {:?}", self.b[i]);
-            println!("    ]");
+            result += &format!("w[{}] {:?}\n", i, self.w[i]);
+            result += &format!("b[{}] {:?}\n", i, self.b[i]);
+            result += &format!("a[{}] {:?}\n", i, self.a[i]);
+            result += "\n";
         }
-        println!("]");
+        result += &format!("a[{}] {:?}", self.w.len() + 1, self.output());
+        result
     }
 
     pub(crate) fn forward(&mut self) {
@@ -177,18 +178,18 @@ impl Brain {
         }
     }
 
-    pub(crate) fn input(&mut self, input: &Mat) {
+    pub(crate) fn input(&mut self, input: &Matrix) {
         assert_eq!(input.rows, 1);
         assert_eq!(input.columns, self.w[0].rows);
 
         self.a[0] = input.clone();
     }
 
-    pub(crate) fn output(&self) -> &Mat {
+    pub(crate) fn output(&self) -> &Matrix {
         &self.a[self.a.len() - 1]
     }
 
-    pub(crate) fn cost(&mut self, ti: &Mat, to: &Mat) -> f32 {
+    pub(crate) fn cost(&mut self, ti: &Matrix, to: &Matrix) -> f32 {
         assert_eq!(ti.rows, to.rows);
         assert_eq!(to.columns, self.output().columns);
 
@@ -210,7 +211,7 @@ impl Brain {
         cost / ti.rows as f32
     }
 
-    pub(crate) fn finite_diff(&mut self, grad: &mut Brain, truth_in: &Mat, truth_out: &Mat) {
+    pub(crate) fn finite_diff(&mut self, grad: &mut Brain, truth_in: &Matrix, truth_out: &Matrix) {
         let mut saved;
 
         let cost_start = self.cost(truth_in, truth_out);

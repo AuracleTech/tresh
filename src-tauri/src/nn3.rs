@@ -148,7 +148,7 @@ pub(crate) fn run(window: &tauri::Window) {
     }
     format!("Final cost: {}", cost(&m));
 
-    emit(window, "<hr/>");
+    emit(window, "<hr>");
 
     // XOR?
     for i in 0..2 {
@@ -160,7 +160,7 @@ pub(crate) fn run(window: &tauri::Window) {
         }
     }
 
-    emit(window, "<hr/>");
+    emit(window, "<hr>");
 
     // OR?
     for i in 0..2 {
@@ -170,7 +170,7 @@ pub(crate) fn run(window: &tauri::Window) {
         }
     }
 
-    emit(window, "<hr/>");
+    emit(window, "<hr>");
 
     // NAND?
     for i in 0..2 {
@@ -180,7 +180,7 @@ pub(crate) fn run(window: &tauri::Window) {
         }
     }
 
-    emit(window, "<hr/>");
+    emit(window, "<hr>");
 
     // AND?
     for i in 0..2 {

@@ -20,7 +20,20 @@ window.addEventListener("DOMContentLoaded", async () => {
 	test = document.getElementById("test");
 
 	appWindow.listen("print", (event) => {
-		display.innerHTML += `${event.payload.data}<br>`;
+		let data = event.payload.data;
+		switch (data) {
+			case "":
+				data = "❌ EMPTY EMIT ❌";
+				break;
+			case "<hr>":
+				// do nothing
+				break;
+			default:
+				// replace new lines with <br>
+				data = data.replace(/\n/g, "<br>") + "<br>";
+				break;
+		}
+		display.innerHTML += data;
 	});
 
 	start_nn4.addEventListener(
