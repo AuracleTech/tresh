@@ -1,12 +1,8 @@
-#[allow(dead_code)]
-mod perco;
 use crate::{
+    brain::Mat,
     data::{EPOCHS, EPOCHS_PER_PRINT, LEARN_RATE, STEP},
     emit,
-    nn::perco::mat_dot,
-    MAT_AT,
 };
-use perco::Mat;
 
 #[derive(Debug)]
 struct Xor {
@@ -21,14 +17,20 @@ struct Xor {
     a2: Mat,
 }
 
-fn mat_row(mat: &Mat, row: usize) -> Mat {
-    let mut result = Mat::new(1, mat.columns);
+pub(crate) fn mat_dot(dst: &mut Mat, a: &Mat, b: &Mat) {
+    assert_eq!(a.columns, b.rows);
+    assert_eq!(dst.rows, a.rows);
+    assert_eq!(dst.columns, b.columns);
 
-    for col in 0..mat.columns {
-        MAT_AT!(result, 0, col) = MAT_AT!(mat, row, col);
+    for row in 0..dst.rows {
+        for col in 0..dst.columns {
+            let mut sum = 0.0;
+            for k in 0..a.columns {
+                sum += a.get(row, k) * b.get(k, col);
+            }
+            dst.set(row, col, sum);
+        }
     }
-
-    result
 }
 
 impl Xor {
@@ -50,15 +52,15 @@ impl Xor {
 
         let mut cost = 0.0;
 
-        for i in 0..ti.rows {
-            let x = mat_row(&ti, i);
-            let y = mat_row(&to, i);
+        for row in 0..ti.rows {
+            let truth_in = ti.row(row);
+            let truth_out = to.row(row);
 
-            self.a0 = x;
+            self.a0 = truth_in;
             self.forward();
 
-            for j in 0..to.columns {
-                let d = MAT_AT!(self.a2, 0, j) - MAT_AT!(y, 0, j);
+            for col in 0..to.columns {
+                let d = self.a2.get(0, col) - truth_out.get(0, col);
                 cost += d * d;
             }
         }
@@ -74,41 +76,41 @@ fn finite_difference(m: &mut Xor, g: &mut Xor, ti: &Mat, to: &Mat) {
 
     for i in 0..m.w1.rows {
         for j in 0..m.w1.columns {
-            saved = MAT_AT!(m.w1, i, j);
-            MAT_AT!(m.w1, i, j) = saved + STEP;
+            saved = m.w1.get(i, j);
+            m.w1.set(i, j, saved + STEP);
             let c2 = m.cost(ti, to);
-            MAT_AT!(g.w1, i, j) = (c2 - c) / STEP;
-            MAT_AT!(m.w1, i, j) = saved;
+            g.w1.set(i, j, (c2 - c) / STEP);
+            m.w1.set(i, j, saved);
         }
     }
 
     for i in 0..m.b1.rows {
         for j in 0..m.b1.columns {
-            saved = MAT_AT!(m.b1, i, j);
-            MAT_AT!(m.b1, i, j) = saved + STEP;
+            saved = m.b1.get(i, j);
+            m.b1.set(i, j, saved + STEP);
             let c2 = m.cost(ti, to);
-            MAT_AT!(g.b1, i, j) = (c2 - c) / STEP;
-            MAT_AT!(m.b1, i, j) = saved;
+            g.b1.set(i, j, (c2 - c) / STEP);
+            m.b1.set(i, j, saved);
         }
     }
 
     for i in 0..m.w2.rows {
         for j in 0..m.w2.columns {
-            saved = MAT_AT!(m.w2, i, j);
-            MAT_AT!(m.w2, i, j) = saved + STEP;
+            saved = m.w2.get(i, j);
+            m.w2.set(i, j, saved + STEP);
             let c2 = m.cost(ti, to);
-            MAT_AT!(g.w2, i, j) = (c2 - c) / STEP;
-            MAT_AT!(m.w2, i, j) = saved;
+            g.w2.set(i, j, (c2 - c) / STEP);
+            m.w2.set(i, j, saved);
         }
     }
 
     for i in 0..m.b2.rows {
         for j in 0..m.b2.columns {
-            saved = MAT_AT!(m.b2, i, j);
-            MAT_AT!(m.b2, i, j) = saved + STEP;
+            saved = m.b2.get(i, j);
+            m.b2.set(i, j, saved + STEP);
             let c2 = m.cost(ti, to);
-            MAT_AT!(g.b2, i, j) = (c2 - c) / STEP;
-            MAT_AT!(m.b2, i, j) = saved;
+            g.b2.set(i, j, (c2 - c) / STEP);
+            m.b2.set(i, j, saved);
         }
     }
 }
@@ -116,25 +118,25 @@ fn finite_difference(m: &mut Xor, g: &mut Xor, ti: &Mat, to: &Mat) {
 fn xor_learn(m: &mut Xor, g: &mut Xor) {
     for i in 0..m.w1.rows {
         for j in 0..m.w1.columns {
-            MAT_AT!(m.w1, i, j) -= MAT_AT!(g.w1, i, j) * LEARN_RATE;
+            m.w1.set(i, j, m.w1.get(i, j) - g.w1.get(i, j) * LEARN_RATE);
         }
     }
 
     for i in 0..m.b1.rows {
         for j in 0..m.b1.columns {
-            MAT_AT!(m.b1, i, j) -= MAT_AT!(g.b1, i, j) * LEARN_RATE;
+            m.b1.set(i, j, m.b1.get(i, j) - g.b1.get(i, j) * LEARN_RATE);
         }
     }
 
     for i in 0..m.w2.rows {
         for j in 0..m.w2.columns {
-            MAT_AT!(m.w2, i, j) -= MAT_AT!(g.w2, i, j) * LEARN_RATE;
+            m.w2.set(i, j, m.w2.get(i, j) - g.w2.get(i, j) * LEARN_RATE);
         }
     }
 
     for i in 0..m.b2.rows {
         for j in 0..m.b2.columns {
-            MAT_AT!(m.b2, i, j) -= MAT_AT!(g.b2, i, j) * LEARN_RATE;
+            m.b2.set(i, j, m.b2.get(i, j) - g.b2.get(i, j) * LEARN_RATE);
         }
     }
 }
@@ -203,6 +205,10 @@ pub(crate) fn run(window: &tauri::Window) {
 
     let c = m.cost(&ti, &to);
     emit(window, format!("Cost = {}", c));
+
+    emit(window, "<hr>");
+    emit(window, "Validation");
+    emit(window, "<hr>");
 
     // Validate
     for i in 0..2 {

@@ -1,6 +1,6 @@
 use super::emit;
+use crate::brain::sigmoid;
 use crate::data::{EPOCHS, EPOCHS_PER_PRINT, LEARN_RATE, TRAINING_DATA};
-use crate::math::sigmoid;
 use rand::rngs::StdRng;
 use rand::Rng;
 use rand::SeedableRng;

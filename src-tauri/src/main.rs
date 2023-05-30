@@ -2,12 +2,14 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 #[allow(dead_code)]
+mod brain;
+#[allow(dead_code)]
 mod data;
-mod math;
-mod nn;
 mod nn1;
 mod nn2;
 mod nn3;
+mod nn4;
+mod nn5;
 
 use serde::Serialize;
 use std::sync::Mutex;
@@ -35,8 +37,8 @@ struct Payload {
 }
 
 #[tauri::command]
-async fn start_percepteur(window: Window) {
-    nn::run(&window);
+async fn start_nn4(window: Window) {
+    nn4::run(&window);
 }
 #[tauri::command]
 async fn start_nn1(window: Window) {
@@ -54,6 +56,10 @@ async fn start_nn2(window: Window) {
 async fn start_nn3(window: Window) {
     nn3::run(&window)
 }
+#[tauri::command]
+async fn start_nn5(window: Window) {
+    nn5::run(&window)
+}
 
 #[tokio::main]
 async fn main() {
@@ -63,11 +69,7 @@ async fn main() {
             logged_in: false,
         }))
         .invoke_handler(tauri::generate_handler![
-            start_nn1,
-            start_nn2,
-            login,
-            start_nn3,
-            start_percepteur
+            login, start_nn1, start_nn2, start_nn3, start_nn4, start_nn5,
         ])
         .run(tauri::generate_context!())
         .expect("failed to run app");
