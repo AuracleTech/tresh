@@ -117,6 +117,36 @@ impl Matrix {
             }
         }
     }
+
+    pub(crate) fn from_2d_vec(data: &Vec<Vec<f32>>) -> Matrix {
+        let rows = data.len();
+        let columns = data[0].len();
+
+        let mut result = Matrix::new(rows, columns);
+
+        for row in 0..rows {
+            for col in 0..columns {
+                result.set(row, col, data[row][col]);
+            }
+        }
+
+        result
+    }
+}
+
+impl std::fmt::Display for Matrix {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut result = String::new();
+
+        for row in 0..self.rows {
+            result += "\n";
+            for col in 0..self.columns {
+                result += &format!("{:.2} ", self.get(row, col));
+            }
+        }
+
+        write!(f, "{}", result)
+    }
 }
 
 #[derive(Debug)]
@@ -155,6 +185,7 @@ impl Brain {
         }
     }
 
+    // TODO change for impl Display
     pub(crate) fn to_string(&self) -> String {
         let mut result = String::new();
         for i in 0..self.w.len() {
@@ -248,5 +279,3 @@ impl Brain {
         }
     }
 }
-
-// TODO optimize step depending on the new cost
