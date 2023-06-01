@@ -16,7 +16,7 @@ use std::sync::Mutex;
 use tauri::{State, Window};
 
 #[derive(Serialize, Clone)]
-pub(crate) struct AuthState {
+pub struct AuthState {
     // #[serde(skip_serializing)]
     // token: Option<String>,
     logged_in: bool,
@@ -75,7 +75,7 @@ async fn main() {
         .expect("failed to run app");
 }
 
-pub(crate) fn emit<T: ToString>(window: &Window, data: T) {
+pub fn emit<T: ToString>(window: &Window, data: T) {
     let payload = Payload {
         data: data.to_string(),
     };

@@ -17,7 +17,7 @@ struct Xor {
     a2: Matrix,
 }
 
-pub(crate) fn mat_dot(dst: &mut Matrix, a: &Matrix, b: &Matrix) {
+pub fn mat_dot(dst: &mut Matrix, a: &Matrix, b: &Matrix) {
     assert_eq!(a.columns, b.rows);
     assert_eq!(dst.rows, a.rows);
     assert_eq!(dst.columns, b.columns);
@@ -34,7 +34,7 @@ pub(crate) fn mat_dot(dst: &mut Matrix, a: &Matrix, b: &Matrix) {
 }
 
 impl Xor {
-    pub(crate) fn forward(&mut self) {
+    pub fn forward(&mut self) {
         // First layer forward pass
         mat_dot(&mut self.a1, &self.a0, &self.w1);
         self.a1.add(&self.b1);
@@ -46,7 +46,7 @@ impl Xor {
         self.a2.sigmoid();
     }
 
-    pub(crate) fn cost(&mut self, ti: &Matrix, to: &Matrix) -> f32 {
+    pub fn cost(&mut self, ti: &Matrix, to: &Matrix) -> f32 {
         assert_eq!(ti.rows, to.rows);
         assert_eq!(to.columns, self.a2.columns);
 
@@ -141,7 +141,7 @@ fn xor_learn(m: &mut Xor, g: &mut Xor) {
     }
 }
 
-pub(crate) fn run(window: &tauri::Window) {
+pub fn run(window: &tauri::Window) {
     // Truth table
     let td = [
         [0.0, 0.0, 0.0],

@@ -120,7 +120,7 @@ fn forward(m: &XorGate, x1: f32, x2: f32) -> f32 {
     sigmoid((a * m.and_w1) + (b * m.and_w2) + m.and_bias)
 }
 
-pub(crate) fn run(window: &tauri::Window) {
+pub fn run(window: &tauri::Window) {
     let seed: u64 = rand::random();
     let mut rng = StdRng::seed_from_u64(seed);
 

@@ -2,19 +2,19 @@ use crate::data::RNG_SEED;
 use crate::data::{LEARN_RATE, STEP};
 use rand::{rngs::StdRng, Rng, SeedableRng};
 
-pub(crate) fn sigmoid(x: f32) -> f32 {
+pub fn sigmoid(x: f32) -> f32 {
     1.0 / (1.0 + (-x).exp())
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct Matrix {
+pub struct Matrix {
     pub rows: usize,
     pub columns: usize,
     pub data: Vec<f32>,
 }
 
 impl Matrix {
-    pub(crate) fn new(rows: usize, columns: usize) -> Matrix {
+    pub fn new(rows: usize, columns: usize) -> Matrix {
         Matrix {
             rows,
             columns,
@@ -22,7 +22,7 @@ impl Matrix {
         }
     }
 
-    pub(crate) fn fill(&mut self, value: f32) {
+    pub fn fill(&mut self, value: f32) {
         for row in 0..self.rows {
             for col in 0..self.columns {
                 self.set(row, col, value);
@@ -30,7 +30,7 @@ impl Matrix {
         }
     }
 
-    pub(crate) fn fill_rand(&mut self, low: f32, high: f32) {
+    pub fn fill_rand(&mut self, low: f32, high: f32) {
         let mut rng = StdRng::seed_from_u64(RNG_SEED);
 
         for index in 0..self.data.len() {
@@ -38,7 +38,7 @@ impl Matrix {
         }
     }
 
-    pub(crate) fn add(&mut self, other: &Matrix) {
+    pub fn add(&mut self, other: &Matrix) {
         assert_eq!(self.rows, other.rows);
         assert_eq!(self.columns, other.columns);
 
@@ -49,7 +49,7 @@ impl Matrix {
         }
     }
 
-    pub(crate) fn sub(&mut self, other: &Matrix) {
+    pub fn sub(&mut self, other: &Matrix) {
         assert_eq!(self.rows, other.rows);
         assert_eq!(self.columns, other.columns);
 
@@ -60,21 +60,21 @@ impl Matrix {
         }
     }
 
-    pub(crate) fn set(&mut self, row: usize, col: usize, value: f32) {
+    pub fn set(&mut self, row: usize, col: usize, value: f32) {
         assert!(row < self.rows);
         assert!(col < self.columns);
 
         self.data[row * self.columns + col] = value;
     }
 
-    pub(crate) fn get(&self, row: usize, col: usize) -> f32 {
+    pub fn get(&self, row: usize, col: usize) -> f32 {
         assert!(row < self.rows);
         assert!(col < self.columns);
 
         self.data[row * self.columns + col]
     }
 
-    pub(crate) fn sigmoid(&mut self) {
+    pub fn sigmoid(&mut self) {
         for row in 0..self.rows {
             for col in 0..self.columns {
                 self.set(row, col, sigmoid(self.get(row, col)));
@@ -82,7 +82,7 @@ impl Matrix {
         }
     }
 
-    pub(crate) fn row(&self, row: usize) -> Matrix {
+    pub fn row(&self, row: usize) -> Matrix {
         let mut result = Matrix::new(1, self.columns);
 
         for col in 0..self.columns {
@@ -92,7 +92,7 @@ impl Matrix {
         result
     }
 
-    pub(crate) fn dot(&mut self, other: &Matrix) {
+    pub fn dot(&mut self, other: &Matrix) {
         assert_eq!(self.columns, other.rows);
 
         let mut result = Matrix::new(self.rows, other.columns);
@@ -110,7 +110,7 @@ impl Matrix {
         *self = result;
     }
 
-    pub(crate) fn dotf(&mut self, value: f32) {
+    pub fn dotf(&mut self, value: f32) {
         for row in 0..self.rows {
             for col in 0..self.columns {
                 self.set(row, col, self.get(row, col) * value);
@@ -118,7 +118,7 @@ impl Matrix {
         }
     }
 
-    pub(crate) fn from_2d_vec(data: &Vec<Vec<f32>>) -> Matrix {
+    pub fn from_2d_vec(data: &Vec<Vec<f32>>) -> Matrix {
         let rows = data.len();
         let columns = data[0].len();
 
@@ -150,14 +150,14 @@ impl std::fmt::Display for Matrix {
 }
 
 #[derive(Debug)]
-pub(crate) struct Brain {
+pub struct NeuralNetwork {
     w: Vec<Matrix>,
     b: Vec<Matrix>,
     a: Vec<Matrix>,
 }
 
-impl Brain {
-    pub(crate) fn new(arch: &[usize]) -> Self {
+impl NeuralNetwork {
+    pub fn new(arch: &[usize]) -> Self {
         assert!(arch.len() > 1);
         assert!(arch[..].iter().all(|&x| x > 0));
 
@@ -178,7 +178,7 @@ impl Brain {
         brain
     }
 
-    pub(crate) fn rand(&mut self, low: f32, high: f32) {
+    pub fn rand(&mut self, low: f32, high: f32) {
         for i in 0..self.w.len() {
             self.w[i].fill_rand(low, high);
             self.b[i].fill_rand(low, high);
@@ -186,7 +186,7 @@ impl Brain {
     }
 
     // TODO change for impl Display
-    pub(crate) fn to_string(&self) -> String {
+    pub fn to_string(&mut self) -> String {
         let mut result = String::new();
         for i in 0..self.w.len() {
             result += &format!("w[{}] {:?}\n", i, self.w[i]);
@@ -198,7 +198,7 @@ impl Brain {
         result
     }
 
-    pub(crate) fn forward(&mut self) {
+    pub fn forward(&mut self) {
         for i in 0..self.w.len() {
             self.a[i + 1] = self.a[i].clone();
             self.a[i + 1].dot(&self.w[i]);
@@ -209,18 +209,19 @@ impl Brain {
         }
     }
 
-    pub(crate) fn input(&mut self, input: &Matrix) {
+    pub fn input(&mut self, input: &Matrix) {
         assert_eq!(input.rows, 1);
         assert_eq!(input.columns, self.w[0].rows);
 
         self.a[0] = input.clone();
     }
 
-    pub(crate) fn output(&self) -> &Matrix {
-        &self.a[self.a.len() - 1]
+    pub fn output(&mut self) -> &mut Matrix {
+        let layers = self.a.len();
+        &mut self.a[layers - 1]
     }
 
-    pub(crate) fn cost(&mut self, ti: &Matrix, to: &Matrix) -> f32 {
+    pub fn cost(&mut self, ti: &Matrix, to: &Matrix) -> f32 {
         assert_eq!(ti.rows, to.rows);
         assert_eq!(to.columns, self.output().columns);
 
@@ -242,7 +243,7 @@ impl Brain {
         cost / ti.rows as f32
     }
 
-    pub(crate) fn finite_diff(&mut self, grad: &mut Brain, truth_in: &Matrix, truth_out: &Matrix) {
+    pub fn finite_diff(&mut self, grad: &mut NeuralNetwork, truth_in: &Matrix, truth_out: &Matrix) {
         let mut saved;
 
         let cost_start = self.cost(truth_in, truth_out);
@@ -270,7 +271,24 @@ impl Brain {
         }
     }
 
-    pub(crate) fn learn(&mut self, grad: &mut Brain) {
+    pub fn backprop(&mut self, g: &mut NeuralNetwork, ti: &Matrix, to: &Matrix) {
+        assert_eq!(ti.rows, to.rows);
+        let n = ti.rows;
+        assert_eq!(self.output().columns, to.columns);
+
+        for row in 0..n {
+            let truth_in = ti.row(row);
+            self.input(&truth_in);
+            self.forward();
+            for col in 0..to.columns {
+                let d = self.output().get(0, col) - to.get(row, col);
+                g.output().set(0, col, d);
+                // FIX finish back propagation
+            }
+        }
+    }
+
+    pub fn learn(&mut self, grad: &mut NeuralNetwork) {
         for layer_index in 0..self.w.len() {
             grad.w[layer_index].dotf(LEARN_RATE);
             self.w[layer_index].sub(&grad.w[layer_index]);
