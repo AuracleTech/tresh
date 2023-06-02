@@ -221,26 +221,26 @@ impl NeuralNetwork {
         &mut self.a[layers - 1]
     }
 
-    pub fn cost(&mut self, ti: &Matrix, to: &Matrix) -> f32 {
-        assert_eq!(ti.rows, to.rows);
-        assert_eq!(to.columns, self.output().columns);
+    pub fn cost(&mut self, truth_in: &Matrix, truth_out: &Matrix) -> f32 {
+        assert_eq!(truth_in.rows, truth_out.rows);
+        assert_eq!(truth_out.columns, self.output().columns);
 
         let mut cost = 0.0;
 
-        for row in 0..ti.rows {
-            let truth_in = ti.row(row);
-            let truth_out = to.row(row);
+        for row in 0..truth_in.rows {
+            let truth_in = truth_in.row(row);
+            let truth_out = truth_out.row(row);
 
             self.input(&truth_in);
             self.forward();
 
-            for col in 0..to.columns {
+            for col in 0..truth_out.columns {
                 let d = self.output().get(0, col) - truth_out.get(0, col);
                 cost += d * d;
             }
         }
 
-        cost / ti.rows as f32
+        cost / truth_in.rows as f32
     }
 
     pub fn finite_diff(&mut self, grad: &mut NeuralNetwork, truth_in: &Matrix, truth_out: &Matrix) {
@@ -294,6 +294,55 @@ impl NeuralNetwork {
             self.w[layer_index].sub(&grad.w[layer_index]);
             grad.b[layer_index].dotf(LEARN_RATE);
             self.b[layer_index].sub(&grad.b[layer_index]);
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_nn_finite_diff_xor_gate() {
+        const EPOCHS: usize = 20000;
+
+        let truth_in = Matrix::from_2d_vec(&vec![
+            vec![0.0, 0.0],
+            vec![1.0, 0.0],
+            vec![0.0, 1.0],
+            vec![1.0, 1.0],
+        ]);
+        let truth_out = Matrix::from_2d_vec(&vec![
+            vec![0.0], //
+            vec![1.0], //
+            vec![1.0], //
+            vec![0.0], //
+        ]);
+
+        let arch = [2, 2, 1];
+        let mut nn = NeuralNetwork::new(&arch);
+        let mut grad = NeuralNetwork::new(&arch);
+
+        nn.rand(0.0, 1.0);
+        let cost_init = nn.cost(&truth_in, &truth_out);
+        assert!(cost_init >= 0.0);
+
+        for _epoch in 1..=EPOCHS {
+            nn.finite_diff(&mut grad, &truth_in, &truth_out);
+            nn.learn(&mut grad);
+        }
+
+        for row in 0..truth_in.rows {
+            let truth_in = truth_in.row(row);
+            let truth_out = truth_out.row(row);
+
+            nn.input(&truth_in);
+            nn.forward();
+
+            let cost = nn.cost(&truth_in, &truth_out);
+            eprintln!("cost {}", cost);
+            assert!(cost < cost_init);
+            assert!(cost < 0.01);
         }
     }
 }

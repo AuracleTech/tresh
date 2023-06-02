@@ -1,5 +1,5 @@
 use super::emit;
-use crate::brain::sigmoid;
+use crate::neural_network::sigmoid;
 use crate::data::{EPOCHS, EPOCHS_PER_PRINT, LEARN_RATE, STEP, TRAINING_DATA};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};

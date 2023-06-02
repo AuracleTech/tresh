@@ -1,5 +1,5 @@
 use crate::{
-    brain::Matrix,
+    neural_network::Matrix,
     data::{EPOCHS, EPOCHS_PER_PRINT, LEARN_RATE, STEP},
     emit,
 };

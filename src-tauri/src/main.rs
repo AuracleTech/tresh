@@ -2,7 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 #[allow(dead_code)]
-mod brain;
+mod neural_network;
 #[allow(dead_code)]
 mod data;
 mod nn1;

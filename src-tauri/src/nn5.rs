@@ -1,7 +1,7 @@
 use crate::{
-    brain::{Matrix, NeuralNetwork},
     data::{EPOCHS, EPOCHS_PER_PRINT},
     emit,
+    neural_network::{Matrix, NeuralNetwork},
 };
 
 pub fn run(window: &tauri::Window) {
@@ -18,24 +18,18 @@ pub fn run(window: &tauri::Window) {
         vec![1.0, 1.0],
     ]);
 
-    // let truth = [
-    //     [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-    //     [0.0, 1.0, 1.0, 0.0, 0.0, 0.0],
-    //     [1.0, 0.0, 1.0, 0.0, 0.0, 0.0],
-    //     [1.0, 1.0, 0.0, 0.0, 0.0, 0.0],
-    // ];
-
-    // let mut truth_in = Matrix::new(4, 2);
-    // for i in 0..4 {
-    //     for j in 0..2 {
-    //         truth_in.set(i, j, truth[i][j]);
-    //     }
-    // }
-
-    // let mut truth_out = Matrix::new(4, 1);
-    // for i in 0..4 {
-    //     truth_out.set(i, 0, truth[i][2]);
-    // }
+    // let truth_in = Matrix::from_2d_vec(&vec![
+    //     vec![0.0, 0.0],
+    //     vec![1.0, 0.0],
+    //     vec![0.0, 1.0],
+    //     vec![1.0, 1.0],
+    // ]);
+    // let truth_out = Matrix::from_2d_vec(&vec![
+    //     vec![0.0], //
+    //     vec![1.0], //
+    //     vec![1.0], //
+    //     vec![0.0], //
+    // ]);
 
     let arch = [2, 2, 1];
     let mut nn = NeuralNetwork::new(&arch);
