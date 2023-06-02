@@ -340,7 +340,6 @@ mod tests {
             nn.forward();
 
             let cost = nn.cost(&truth_in, &truth_out);
-            eprintln!("cost {}", cost);
             assert!(cost < cost_init);
             assert!(cost < 0.01);
         }
