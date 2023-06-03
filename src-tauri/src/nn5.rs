@@ -13,21 +13,6 @@ pub fn run(window: &tauri::Window) {
     emit(window, format!("EPOCHS: {}", EPOCHS));
     emit(window, "<hr>");
 
-    // SUM DATA
-    // let truth_in = Matrix::from_2d_vec(&vec![
-    //     vec![0.0, 0.0, 0.0, 0.0],
-    //     vec![0.0, 0.0, 0.0, 0.1],
-    //     vec![0.0, 0.1, 0.0, 0.1],
-    //     vec![0.0, 0.1, 1.0, 0.0],
-    // ]);
-    // let truth_out = Matrix::from_2d_vec(&vec![
-    //     vec![0.0, 0.0],
-    //     vec![0.0, 0.1],
-    //     vec![1.0, 0.0],
-    //     vec![1.0, 1.0],
-    // ]);
-
-    // XOR DATA
     let truth_in = Matrix::from_2d_vec(&vec![
         vec![0., 0.],
         vec![1., 0.],
@@ -41,11 +26,11 @@ pub fn run(window: &tauri::Window) {
         vec![0.], //
     ]);
 
-    let arch = [2, 2, 1];
+    let arch = [truth_in.columns, 2, truth_out.columns];
     let mut nn = NeuralNetwork::new(&arch);
     let mut grad = NeuralNetwork::new(&arch);
 
-    nn.rand(0.0, 1.0);
+    nn.rand(0., 1.);
     let cost_init = nn.cost(&truth_in, &truth_out);
     emit(window, format!("Cost pre-training: {}", cost_init));
 
