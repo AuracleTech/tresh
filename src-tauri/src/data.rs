@@ -1,11 +1,11 @@
 pub const RNG_SEED: u64 = 0xdeadbeef;
 pub const LEARN_RATE: f32 = 1.;
 pub const STEP: f32 = 1e-1;
-pub const EPOCHS: usize = 10_000;
+pub const EPOCHS: usize = 1000;
 // pub const EPOCHS: usize = 1;
-const TOTAL_PRINTS_DURING_EPOCHS: usize = 15;
+const TOTAL_PRINTS_DURING_EPOCHS: usize = 10;
 pub const EPOCHS_PER_PRINT: usize = if TOTAL_PRINTS_DURING_EPOCHS > EPOCHS {
-    1
+    EPOCHS
 } else {
     EPOCHS / TOTAL_PRINTS_DURING_EPOCHS
 };
