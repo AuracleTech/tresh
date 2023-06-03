@@ -2,9 +2,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 #[allow(dead_code)]
-mod neural_network;
-#[allow(dead_code)]
 mod data;
+#[allow(dead_code)]
+mod neural_network;
 mod nn1;
 mod nn2;
 mod nn3;
@@ -23,7 +23,7 @@ pub struct AuthState {
 }
 
 #[tauri::command]
-fn login(state_mutex: State<Mutex<AuthState>>) -> Result<AuthState, String> {
+fn fake_login(state_mutex: State<Mutex<AuthState>>) -> Result<AuthState, String> {
     println!("Logging in");
     let mut state = state_mutex.lock().expect("failed to lock state");
     state.logged_in = true;
@@ -69,7 +69,7 @@ async fn main() {
             logged_in: false,
         }))
         .invoke_handler(tauri::generate_handler![
-            login, start_nn1, start_nn2, start_nn3, start_nn4, start_nn5,
+            fake_login, start_nn1, start_nn2, start_nn3, start_nn4, start_nn5,
         ])
         .run(tauri::generate_context!())
         .expect("failed to run app");

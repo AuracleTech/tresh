@@ -8,7 +8,7 @@ let start_nn2;
 let start_nn3;
 let start_nn4;
 let start_nn5;
-let test;
+// let fake_login;
 
 window.addEventListener("DOMContentLoaded", async () => {
 	display = document.getElementById("display");
@@ -17,13 +17,13 @@ window.addEventListener("DOMContentLoaded", async () => {
 	start_nn3 = document.getElementById("start-nn3");
 	start_nn4 = document.getElementById("start-nn4");
 	start_nn5 = document.getElementById("start-nn5");
-	test = document.getElementById("test");
+	// fake_login = document.getElementById("fake-login");
 
 	appWindow.listen("print", (event) => {
 		let data = event.payload.data;
 		switch (data) {
 			case "":
-				data = "❌ EMPTY EMIT ❌";
+				data = "❌ EMPTY DATA RECEIVED ❌";
 				break;
 			case "<hr>":
 				// do nothing
@@ -45,16 +45,14 @@ window.addEventListener("DOMContentLoaded", async () => {
 	start_nn3.addEventListener("click", () => invoke("start_nn3") && cls());
 	start_nn4.addEventListener("click", () => invoke("start_nn4") && cls());
 	start_nn5.addEventListener("click", () => invoke("start_nn5") && cls());
-	test.addEventListener("click", async () => {
-		// appWindow.emit("test", { data: "test", id: 1 });
-		try {
-			const state = await invoke("login");
-			console.log(state);
-			// { logged_in: true }
-		} catch (e) {
-			console.error(e);
-		}
-	});
+	// fake_login.addEventListener("click", async () => {
+	// 	try {
+	// 		const state = await invoke("fake_login");
+	// 		console.log(state); // { logged_in: true }
+	// 	} catch (e) {
+	// 		console.error(e);
+	// 	}
+	// });
 });
 
 const cls = () => (display.innerHTML = "");
