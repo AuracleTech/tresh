@@ -8,6 +8,7 @@ let start_nn2;
 let start_nn3;
 let start_nn4;
 let start_nn5;
+let start_nn6;
 // let fake_login;
 
 window.addEventListener("DOMContentLoaded", async () => {
@@ -17,6 +18,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 	start_nn3 = document.getElementById("start-nn3");
 	start_nn4 = document.getElementById("start-nn4");
 	start_nn5 = document.getElementById("start-nn5");
+	start_nn6 = document.getElementById("start-nn6");
 	// fake_login = document.getElementById("fake-login");
 
 	appWindow.listen("print", (event) => {
@@ -45,6 +47,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 	start_nn3.addEventListener("click", () => invoke("start_nn3") && cls());
 	start_nn4.addEventListener("click", () => invoke("start_nn4") && cls());
 	start_nn5.addEventListener("click", () => invoke("start_nn5") && cls());
+	start_nn6.addEventListener("click", () => invoke("start_nn6") && cls());
 	// fake_login.addEventListener("click", async () => {
 	// 	try {
 	// 		const state = await invoke("fake_login");

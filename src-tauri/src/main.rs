@@ -10,6 +10,7 @@ mod nn2;
 mod nn3;
 mod nn4;
 mod nn5;
+mod nn6;
 
 use serde::Serialize;
 use std::sync::Mutex;
@@ -60,6 +61,10 @@ async fn start_nn3(window: Window) {
 async fn start_nn5(window: Window) {
     nn5::run(&window)
 }
+#[tauri::command]
+async fn start_nn6(window: Window) {
+    nn6::run(&window)
+}
 
 #[tokio::main]
 async fn main() {
@@ -69,7 +74,7 @@ async fn main() {
             logged_in: false,
         }))
         .invoke_handler(tauri::generate_handler![
-            fake_login, start_nn1, start_nn2, start_nn3, start_nn4, start_nn5,
+            fake_login, start_nn1, start_nn2, start_nn3, start_nn4, start_nn5, start_nn6
         ])
         .run(tauri::generate_context!())
         .expect("failed to run app");
