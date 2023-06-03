@@ -3,7 +3,7 @@ use crate::data::{LEARN_RATE, STEP};
 use rand::{rngs::StdRng, Rng, SeedableRng};
 
 pub fn sigmoid(x: f32) -> f32 {
-    1.0 / (1.0 + (-x).exp())
+    1. / (1. + (-x).exp())
 }
 
 #[derive(Debug, Clone)]
@@ -18,7 +18,7 @@ impl Matrix {
         Matrix {
             rows,
             columns,
-            data: vec![0.0; rows * columns],
+            data: vec![0.; rows * columns],
         }
     }
 
@@ -67,6 +67,7 @@ impl Matrix {
         self.data[row * self.columns + col] = value;
     }
 
+    // FIX REPLACE SET AND GET BY ONLY ONE FUNCTION CALLED AT
     pub fn get(&self, row: usize, col: usize) -> f32 {
         assert!(row < self.rows);
         assert!(col < self.columns);
@@ -99,7 +100,7 @@ impl Matrix {
 
         for row in 0..self.rows {
             for col in 0..other.columns {
-                let mut sum = 0.0;
+                let mut sum = 0.;
                 for k in 0..self.columns {
                     sum += self.get(row, k) * other.get(k, col);
                 }
@@ -134,12 +135,15 @@ impl Matrix {
     }
 }
 
+// TODO improve display for matrices
 impl std::fmt::Display for Matrix {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut result = String::new();
 
         for row in 0..self.rows {
-            result += "\n";
+            if self.rows > 1 {
+                result += "\n";
+            }
             for col in 0..self.columns {
                 result += &format!("{:.2} ", self.get(row, col));
             }
@@ -187,14 +191,15 @@ impl NeuralNetwork {
 
     // TODO change for impl Display
     pub fn to_string(&mut self) -> String {
-        let mut result = String::new();
+        let mut result = "[\n".to_string();
         for i in 0..self.w.len() {
-            result += &format!("w[{}] {:?}\n", i, self.w[i]);
-            result += &format!("b[{}] {:?}\n", i, self.b[i]);
-            result += &format!("a[{}] {:?}\n", i, self.a[i]);
+            result += &format!("_ _ a[{}] {:?}\n", i, self.a[i]);
             result += "\n";
+            result += &format!("_ _ w[{}] {:?}\n", i, self.w[i]);
+            result += &format!("_ _ b[{}] {:?}\n", i, self.b[i]);
         }
-        result += &format!("a[{}] {:?}", self.w.len() + 1, self.output());
+        result += &format!("_ _ a[{}] {:?}\n", self.a.len() - 1, self.output());
+        result += "]";
         result
     }
 
@@ -225,7 +230,7 @@ impl NeuralNetwork {
         assert_eq!(truth_in.rows, truth_out.rows);
         assert_eq!(truth_out.columns, self.output().columns);
 
-        let mut cost = 0.0;
+        let mut cost = 0.;
 
         for row in 0..truth_in.rows {
             let truth_in = truth_in.row(row);
@@ -273,17 +278,72 @@ impl NeuralNetwork {
 
     pub fn backprop(&mut self, g: &mut NeuralNetwork, ti: &Matrix, to: &Matrix) {
         assert_eq!(ti.rows, to.rows);
-        let n = ti.rows;
         assert_eq!(self.output().columns, to.columns);
+        let n: usize = ti.rows;
 
-        for row in 0..n {
-            let truth_in = ti.row(row);
-            self.input(&truth_in);
+        g.fill(0.);
+
+        // i - current sample
+        // l - current layer
+        // j - current activation
+        // k - previous activation
+
+        for i in 0..n {
+            self.input(&ti.row(i));
             self.forward();
-            for col in 0..to.columns {
-                let d = self.output().get(0, col) - to.get(row, col);
-                g.output().set(0, col, d);
-                // FIX finish back propagation
+
+            for j in 0..=self.w.len() {
+                g.a[j].fill(0.);
+            }
+
+            for j in 0..to.columns {
+                let d = self.output().get(0, j) - to.get(i, j);
+                g.output().set(0, j, d);
+            }
+
+            // TEST for (size_t l = nn.count; l > 0; --l) {
+            for l in (1..=self.w.len()).rev() {
+                for j in 0..self.a[l].columns {
+                    let a = self.a[l].get(0, j);
+                    let da = g.a[l].get(0, j);
+
+                    let mut nb = g.b[l - 1].get(0, j);
+                    nb += 2. * da * a * (1. - a);
+                    g.b[l - 1].set(0, j, nb);
+
+                    for k in 0..self.a[l - 1].columns {
+                        // j - weight matrix col
+                        // k - weight matrix row
+                        let pa = self.a[l - 1].get(0, k);
+                        let w = self.w[l - 1].get(k, j);
+
+                        let mut naw = g.w[l - 1].get(k, j);
+                        naw += 2. * da * a * (1. - a) * pa;
+                        g.w[l - 1].set(k, j, naw);
+
+                        let mut na = g.a[l - 1].get(0, k);
+                        na += 2. * da * a * (1. - a) * w;
+                        g.a[l - 1].set(0, k, na);
+                    }
+                }
+            }
+        }
+
+        for i in 0..g.w.len() {
+            for j in 0..g.w[i].rows {
+                for k in 0..g.w[i].columns {
+                    let mut nw = g.w[i].get(j, k);
+                    nw /= n as f32;
+                    g.w[i].set(j, k, nw);
+                }
+            }
+
+            for j in 0..g.b[i].rows {
+                for k in 0..g.b[i].columns {
+                    let mut nb = g.b[i].get(j, k);
+                    nb /= n as f32;
+                    g.b[i].set(j, k, nb);
+                }
             }
         }
     }
@@ -296,6 +356,16 @@ impl NeuralNetwork {
             self.b[layer_index].sub(&grad.b[layer_index]);
         }
     }
+
+    pub fn fill(&mut self, value: f32) {
+        for i in 0..self.w.len() {
+            self.w[i].fill(value);
+            self.b[i].fill(value);
+            self.a[i].fill(value);
+        }
+        let i = self.a.len() - 1;
+        self.a[i].fill(0.0);
+    }
 }
 
 #[cfg(test)]
@@ -304,26 +374,26 @@ mod tests {
 
     #[test]
     fn test_nn_finite_diff_xor_gate() {
-        const EPOCHS: usize = 20000;
+        const EPOCHS: usize = 20_000;
 
         let truth_in = Matrix::from_2d_vec(&vec![
-            vec![0.0, 0.0],
-            vec![1.0, 0.0],
-            vec![0.0, 1.0],
-            vec![1.0, 1.0],
+            vec![0., 0.],
+            vec![1., 0.],
+            vec![0., 1.],
+            vec![1., 1.],
         ]);
         let truth_out = Matrix::from_2d_vec(&vec![
-            vec![0.0], //
-            vec![1.0], //
-            vec![1.0], //
-            vec![0.0], //
+            vec![0.], //
+            vec![1.], //
+            vec![1.], //
+            vec![0.], //
         ]);
 
         let arch = [2, 2, 1];
         let mut nn = NeuralNetwork::new(&arch);
         let mut grad = NeuralNetwork::new(&arch);
 
-        nn.rand(0.0, 1.0);
+        nn.rand(0., 1.);
         let cost_init = nn.cost(&truth_in, &truth_out);
         assert!(cost_init >= 0.0);
 
