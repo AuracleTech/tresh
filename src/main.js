@@ -35,7 +35,14 @@ window.addEventListener("DOMContentLoaded", async () => {
 				data = data.replace(/\n/g, "<br>") + "<br>";
 				break;
 		}
+		let autoscroll = false;
+		if (display.scrollTop + display.clientHeight >= display.scrollHeight - 1) {
+			autoscroll = true;
+		}
 		display.innerHTML += data;
+		if (autoscroll) {
+			display.scrollTop = display.scrollHeight;
+		}
 	});
 
 	start_nn4.addEventListener(
